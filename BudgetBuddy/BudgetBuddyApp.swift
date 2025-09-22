@@ -11,7 +11,8 @@ import SwiftUI
 struct BudgetBuddyApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
         }
+        .modelContainer(for: ExpenseItem.self)
     }
 }
