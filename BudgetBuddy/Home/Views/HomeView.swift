@@ -24,7 +24,12 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            conditionalView
+            VStack(spacing: 0){
+                conditionalView
+            }
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    Color.clear.frame(height: 25)
+                }
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarLeading) {
                         if !noExpensesAdded {
@@ -39,6 +44,7 @@ struct HomeView: View {
                     }
                 }
                 .navigationTitle("BudgetBuddy")
+                
         }
     }
 }
@@ -59,6 +65,7 @@ extension HomeView {
                 expenseType: expenseTypeShowed,
                 sortOrder: sortOrder
             )
+            
       }
     }
 
@@ -76,11 +83,26 @@ extension HomeView {
                 "slider.horizontal.3"
         ) {
             Picker("Filter", selection: $expenseTypeShowed) {
-                Text("Show only food expenses")
+                Text("Food expenses")
                     .tag(ExpenseType.food as ExpenseType?)
 
-                Text("Show only social expenses")
+                Text("Social expenses")
                     .tag(ExpenseType.social as ExpenseType?)
+                
+                Text("Transport expenses")
+                    .tag(ExpenseType.transport as ExpenseType?)
+
+                Text("Culture expenses")
+                    .tag(ExpenseType.culture as ExpenseType?)
+                
+                Text("Household expenses")
+                    .tag(ExpenseType.household as ExpenseType?)
+
+                Text("Education expenses")
+                    .tag(ExpenseType.education as ExpenseType?)
+                
+                Text("Gift expenses")
+                    .tag(ExpenseType.gift as ExpenseType?)
 
                 Text("Remove filters")
                     .tag(nil as ExpenseType?)

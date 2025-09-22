@@ -58,6 +58,7 @@ extension ExpenseView {
             NoExpensesView(expenseType: expenseType)
         } else {
             listView
+    
         }
     }
     

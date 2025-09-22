@@ -28,9 +28,9 @@ struct AddView: View {
                         .textInputAutocapitalization(.never)
                 }
                 Section("Expense details") {
-                    Picker("Type", selection: $type) {
+                    Picker("Category", selection: $type) {
                         ForEach(ExpenseType.allCases, id: \.self) { type in
-                                Text(type.displayName).tag(type)
+                            Text(type.displayIcon + " " + type.displayName).tag(type)
                             }
                     }
                     HStack {

@@ -33,7 +33,7 @@ private enum Layout {
         static let height: CGFloat = 55
         static let cornerRadius: CGFloat = 10
         static let internalPadding: CGFloat = 30
-        static let externalPadding: CGFloat = 40
+        static let externalPadding: CGFloat = 30
     }
 }
 
