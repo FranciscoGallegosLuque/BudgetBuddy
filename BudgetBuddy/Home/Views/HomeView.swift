@@ -11,7 +11,7 @@ import SwiftUI
 struct HomeView: View {
     @Environment(\.modelContext) var modelContext
     @Query var expenses: [ExpenseItem]
-    @State private var expenseTypeShowed = ""
+    @State private var expenseTypeShowed: ExpenseType? = nil
     
     private var noExpensesAdded: Bool { expenses.isEmpty }
 
@@ -45,6 +45,7 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
+        .modelContainer(PreviewSampleData.sampleExpenses())
 }
 
 extension HomeView {
@@ -75,14 +76,14 @@ extension HomeView {
                 "slider.horizontal.3"
         ) {
             Picker("Filter", selection: $expenseTypeShowed) {
-                Text("Show only Personal expenses")
-                    .tag("Personal")
+                Text("Show only food expenses")
+                    .tag(ExpenseType.food as ExpenseType?)
 
-                Text("Show only Business expenses")
-                    .tag("Business")
+                Text("Show only social expenses")
+                    .tag(ExpenseType.social as ExpenseType?)
 
                 Text("Remove filters")
-                    .tag("")
+                    .tag(nil as ExpenseType?)
             }
         }
     }
