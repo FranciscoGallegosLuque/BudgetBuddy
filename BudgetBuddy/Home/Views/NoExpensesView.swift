@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct NoExpensesView: View {
-    var expenseType: String = ""
+    var expenseType: ExpenseType? = nil
 
     var body: some View {
         VStack(spacing: Layout.spacing) {
@@ -21,7 +21,7 @@ struct NoExpensesView: View {
 }
 
 #Preview {
-    NoExpensesView()
+    NoExpensesView(expenseType: .culture)
 }
 
 private enum Layout {
@@ -33,29 +33,39 @@ private enum Layout {
         static let height: CGFloat = 55
         static let cornerRadius: CGFloat = 10
         static let internalPadding: CGFloat = 30
-        static let externalPadding: CGFloat = 40
+        static let externalPadding: CGFloat = 30
     }
 }
 
 extension NoExpensesView {
+    
     private var title: some View {
-        Text(
-            expenseType.isEmpty
-                ? "No expenses yet!"
-                : "No \(expenseType.lowercased()) expenses yet!"
-        )
-        .font(.title)
-        .fontWeight(.semibold)
-        .multilineTextAlignment(.center)
+        Text(titleText)
+            .font(.title)
+            .fontWeight(.semibold)
+            .multilineTextAlignment(.center)
+    }
+    
+    private var titleText: String {
+        if let expenseType = self.expenseType {
+            "No \(expenseType.displayName.lowercased()) expenses yet!"
+        } else {
+            "No expenses yet!"
+        }
     }
     
     private var description: some View {
-        Text(
-            expenseType.isEmpty
-                ? "Add your first expense below"
-                : "Add your first \(expenseType.lowercased()) expense below"
-        )
+        Text(descriptionText)
         .padding(.bottom, Layout.bottomPadding)
+        .multilineTextAlignment(.center)
+    }
+    
+    private var descriptionText: String  {
+        if let expenseType = self.expenseType {
+            "Add your first \(expenseType.displayName.lowercased()) expense below or change the filters applied"
+        } else {
+            "Add your first expense below"
+        }
     }
     
     private var addExpenseButton: some View {

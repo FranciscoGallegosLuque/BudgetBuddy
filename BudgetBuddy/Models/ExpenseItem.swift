@@ -12,20 +12,25 @@ import SwiftData
 class ExpenseItem: Identifiable, Equatable {
     var id = UUID()
     var name: String
-    var type: ExpenseType
+    var typeRaw: String
     var amount: Double
     var date: Date
+    
+    var type: ExpenseType {
+            get { ExpenseType(rawValue: typeRaw) ?? .food }
+            set { typeRaw = newValue.rawValue }
+        }
     
     init(id: UUID = UUID(), name: String, type: ExpenseType, amount: Double, date: Date = .now) {
         self.id = id
         self.name = name
-        self.type = type
+        self.typeRaw = type.rawValue
         self.amount = amount
         self.date = date
     }
 }
 
-enum ExpenseType {
+enum ExpenseType: String, Codable, CaseIterable {
     case food
     case social
     case transport

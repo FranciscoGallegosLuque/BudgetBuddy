@@ -11,7 +11,7 @@ import SwiftUI
 struct HomeView: View {
     @Environment(\.modelContext) var modelContext
     @Query var expenses: [ExpenseItem]
-    @State private var expenseTypeShowed = ""
+    @State private var expenseTypeShowed: ExpenseType? = nil
     
     private var noExpensesAdded: Bool { expenses.isEmpty }
 
@@ -24,7 +24,12 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            conditionalView
+            VStack(spacing: 0){
+                conditionalView
+            }
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    Color.clear.frame(height: 25)
+                }
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarLeading) {
                         if !noExpensesAdded {
@@ -39,12 +44,14 @@ struct HomeView: View {
                     }
                 }
                 .navigationTitle("BudgetBuddy")
+                
         }
     }
 }
 
 #Preview {
     HomeView()
+        .modelContainer(PreviewSampleData.sampleExpenses())
 }
 
 extension HomeView {
@@ -58,6 +65,7 @@ extension HomeView {
                 expenseType: expenseTypeShowed,
                 sortOrder: sortOrder
             )
+            
       }
     }
 
@@ -75,14 +83,29 @@ extension HomeView {
                 "slider.horizontal.3"
         ) {
             Picker("Filter", selection: $expenseTypeShowed) {
-                Text("Show only Personal expenses")
-                    .tag("Personal")
+                Text("Food expenses")
+                    .tag(ExpenseType.food as ExpenseType?)
 
-                Text("Show only Business expenses")
-                    .tag("Business")
+                Text("Social expenses")
+                    .tag(ExpenseType.social as ExpenseType?)
+                
+                Text("Transport expenses")
+                    .tag(ExpenseType.transport as ExpenseType?)
+
+                Text("Culture expenses")
+                    .tag(ExpenseType.culture as ExpenseType?)
+                
+                Text("Household expenses")
+                    .tag(ExpenseType.household as ExpenseType?)
+
+                Text("Education expenses")
+                    .tag(ExpenseType.education as ExpenseType?)
+                
+                Text("Gift expenses")
+                    .tag(ExpenseType.gift as ExpenseType?)
 
                 Text("Remove filters")
-                    .tag("")
+                    .tag(nil as ExpenseType?)
             }
         }
     }

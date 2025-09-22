@@ -16,10 +16,8 @@ struct AddView: View {
     private var disableForm: Bool { name.isEmpty || amount == nil }
 
     @State private var name = ""
-    @State private var type = "Personal"
+    @State private var type: ExpenseType = .food
     @State private var amount: Double? = nil
-
-    let types = ["Business", "Personal"]
 
     var body: some View {
         NavigationStack {
@@ -30,10 +28,10 @@ struct AddView: View {
                         .textInputAutocapitalization(.never)
                 }
                 Section("Expense details") {
-                    Picker("Type", selection: $type) {
-                        ForEach(types, id: \.self) {
-                            Text($0)
-                        }
+                    Picker("Category", selection: $type) {
+                        ForEach(ExpenseType.allCases, id: \.self) { type in
+                            Text(type.displayIcon + " " + type.displayName).tag(type)
+                            }
                     }
                     HStack {
                         Text("$")

@@ -11,25 +11,28 @@ import SwiftUI
 struct ExpenseView: View {
     @Environment(\.modelContext) var modelContext
     @Query var expenses: [ExpenseItem]
-    var expenseType: String
+    var expenseType: ExpenseType? = nil
 
     var body: some View {
         conditionalView
     }
 
-    init(expenseType: String, sortOrder: [SortDescriptor<ExpenseItem>]) {
-        _expenses = Query(
-            filter: #Predicate<ExpenseItem> { expense in
-                if expenseType == "" {
-                    return true
-                } else {
-                    return (expense.type == expenseType)
-                }
-            },
-            sort: sortOrder
-        )
+    init(expenseType: ExpenseType?, sortOrder: [SortDescriptor<ExpenseItem>]) {
+        if let expenseType {
+            _expenses = Query(
+                filter: #Predicate<ExpenseItem> { expense in
+                    expense.typeRaw == expenseType.rawValue
+                },
+                sort: sortOrder
+            )
+        } else {
+            _expenses = Query(
+                sort: sortOrder
+            )
+        }
         self.expenseType = expenseType
     }
+
 
     func removeItems(at offsets: IndexSet) {
         for offset in offsets {
@@ -41,10 +44,10 @@ struct ExpenseView: View {
 
 #Preview {
     ExpenseView(
-        expenseType: "Personal",
+        expenseType: nil,
         sortOrder: [SortDescriptor(\ExpenseItem.name)]
     )
-    .modelContainer(for: ExpenseItem.self)
+    .modelContainer(PreviewSampleData.sampleExpenses())
 }
 
 extension ExpenseView {
@@ -55,6 +58,7 @@ extension ExpenseView {
             NoExpensesView(expenseType: expenseType)
         } else {
             listView
+    
         }
     }
     
@@ -68,7 +72,10 @@ extension ExpenseView {
                         VStack(alignment: .leading) {
                             Text(expense.name)
                                 .font(.headline)
-                            Text(expense.type)
+                            HStack {
+                                Text(expense.type.displayIcon)
+                                Text(expense.type.displayName)
+                            }
                         }
                     }
                     Spacer()
@@ -81,7 +88,7 @@ extension ExpenseView {
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("\(expense.name), costs \(expense.amount)")
-                .accessibilityHint(expense.type)
+                .accessibilityHint(expense.type.displayName)
             }
             .onDelete(perform: removeItems)
         }
