@@ -13,6 +13,7 @@ class ExpenseItem: Identifiable, Equatable {
     var id = UUID()
     var name: String
     var typeRaw: String
+    var accountRaw: String
     var amount: Double
     var date: Date
     
@@ -21,10 +22,16 @@ class ExpenseItem: Identifiable, Equatable {
             set { typeRaw = newValue.rawValue }
         }
     
-    init(id: UUID = UUID(), name: String, type: ExpenseType, amount: Double, date: Date = .now) {
+    var account: Account {
+        get { Account(rawValue: accountRaw) ?? .cash }
+        set { accountRaw = newValue.rawValue }
+    }
+    
+    init(id: UUID = UUID(), name: String, type: ExpenseType, account: Account, amount: Double, date: Date) {
         self.id = id
         self.name = name
         self.typeRaw = type.rawValue
+        self.accountRaw = account.rawValue
         self.amount = amount
         self.date = date
     }
@@ -38,4 +45,10 @@ enum ExpenseType: String, Codable, CaseIterable {
     case household
     case education
     case gift
+}
+
+enum Account: String, Codable, CaseIterable {
+    case cash
+    case credit
+    case debit
 }

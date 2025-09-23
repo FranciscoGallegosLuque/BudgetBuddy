@@ -11,10 +11,8 @@ import SwiftUI
 struct HomeView: View {
     @Environment(\.modelContext) var modelContext
     @Query var expenses: [ExpenseItem]
-    @State private var expenseTypeShowed: ExpenseType? = nil
+    @State private var expenseTypeShowed: ExpenseType?
     
-    private var noExpensesAdded: Bool { expenses.isEmpty }
-
     @State private var sortOrder = [
         SortDescriptor(\ExpenseItem.date, order: .reverse),
         SortDescriptor(\ExpenseItem.name),
@@ -32,13 +30,13 @@ struct HomeView: View {
                 }
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarLeading) {
-                        if !noExpensesAdded {
+                        if !expenses.isEmpty {
                             filterButton
 //                            sortButton
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        if !noExpensesAdded {
+                        if !expenses.isEmpty {
                             expenseButton
                         }
                     }

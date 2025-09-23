@@ -12,7 +12,6 @@ struct ExpenseView: View {
     @Environment(\.modelContext) var modelContext
     @Query var expenses: [ExpenseItem]
     var expenseType: ExpenseType?
-
     var expensesGroupedByDay: [Date: [ExpenseItem]] {
         Dictionary(grouping: expenses) { expense in
             Calendar.current.startOfDay(for: expense.date)
@@ -51,6 +50,7 @@ extension ExpenseView {
                 sort: sortOrder
             )
         }
+
         self.expenseType = expenseType
     }
 
@@ -113,13 +113,17 @@ extension ExpenseView {
     }
 
     private func amountText(for expense: ExpenseItem) -> some View {
-        Text(
-            expense.amount,
-            format: .currency(
-                code: Locale.current.currency?.identifier
+        VStack(alignment: .trailing) {
+            Text(
+                expense.amount,
+                format: .currency(
+                    code: Locale.current.currency?.identifier
                     ?? "USD"
+                )
             )
-        )
+            .font(.headline)
+            Text(expense.account.rawValue.capitalized).font(.subheadline)
+        }
     }
 
 }
