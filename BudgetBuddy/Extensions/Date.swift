@@ -8,7 +8,7 @@
 import Foundation
 
 extension Date {
-    var shortMonthDay: String {
+    var shortMonthDayTwoLines: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM \n d"
         return formatter.string(from: self)
