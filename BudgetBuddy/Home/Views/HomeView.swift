@@ -11,7 +11,7 @@ import SwiftUI
 struct HomeView: View {
     @Environment(\.modelContext) var modelContext
     @Query var expenses: [ExpenseItem]
-    @State private var expenseTypeShowed: ExpenseType?
+    @State private var categoryShowed: Category?
     
     @State private var sortOrder = [
         SortDescriptor(\ExpenseItem.date, order: .reverse),
@@ -56,11 +56,11 @@ extension HomeView {
 
     @ViewBuilder
     private var conditionalView: some View {
-        if noExpensesAdded {
+        if expenses.isEmpty {
             NoExpensesView()
         } else {
             ExpenseView(
-                expenseType: expenseTypeShowed,
+                category: categoryShowed,
                 sortOrder: sortOrder
             )
             
@@ -80,30 +80,30 @@ extension HomeView {
             systemImage:
                 "slider.horizontal.3"
         ) {
-            Picker("Filter", selection: $expenseTypeShowed) {
+            Picker("Filter", selection: $categoryShowed) {
                 Text("Food expenses")
-                    .tag(ExpenseType.food as ExpenseType?)
+                    .tag(Category.food as Category?)
 
                 Text("Social expenses")
-                    .tag(ExpenseType.social as ExpenseType?)
+                    .tag(Category.social as Category?)
                 
                 Text("Transport expenses")
-                    .tag(ExpenseType.transport as ExpenseType?)
+                    .tag(Category.transport as Category?)
 
                 Text("Culture expenses")
-                    .tag(ExpenseType.culture as ExpenseType?)
+                    .tag(Category.culture as Category?)
                 
                 Text("Household expenses")
-                    .tag(ExpenseType.household as ExpenseType?)
+                    .tag(Category.household as Category?)
 
                 Text("Education expenses")
-                    .tag(ExpenseType.education as ExpenseType?)
+                    .tag(Category.education as Category?)
                 
                 Text("Gift expenses")
-                    .tag(ExpenseType.gift as ExpenseType?)
+                    .tag(Category.gift as Category?)
 
                 Text("Remove filters")
-                    .tag(nil as ExpenseType?)
+                    .tag(nil as Category?)
             }
         }
     }

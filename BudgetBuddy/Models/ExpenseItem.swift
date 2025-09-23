@@ -12,14 +12,14 @@ import SwiftData
 class ExpenseItem: Identifiable, Equatable {
     var id = UUID()
     var name: String
-    var typeRaw: String
+    var categoryRaw: String
     var accountRaw: String
     var amount: Double
     var date: Date
     
-    var type: ExpenseType {
-            get { ExpenseType(rawValue: typeRaw) ?? .food }
-            set { typeRaw = newValue.rawValue }
+    var category: Category {
+            get { Category(rawValue: categoryRaw) ?? .food }
+            set { categoryRaw = newValue.rawValue }
         }
     
     var account: Account {
@@ -27,17 +27,17 @@ class ExpenseItem: Identifiable, Equatable {
         set { accountRaw = newValue.rawValue }
     }
     
-    init(id: UUID = UUID(), name: String, type: ExpenseType, account: Account, amount: Double, date: Date) {
+    init(id: UUID = UUID(), name: String, category: Category, account: Account, amount: Double, date: Date) {
         self.id = id
         self.name = name
-        self.typeRaw = type.rawValue
+        self.categoryRaw = category.rawValue
         self.accountRaw = account.rawValue
         self.amount = amount
         self.date = date
     }
 }
 
-enum ExpenseType: String, Codable, CaseIterable {
+enum Category: String, Codable, CaseIterable {
     case food
     case social
     case transport

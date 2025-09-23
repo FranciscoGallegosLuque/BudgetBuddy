@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension ExpenseType {
+extension Category {
     var displayName: String {
         switch self {
         case .food: return "Food"
