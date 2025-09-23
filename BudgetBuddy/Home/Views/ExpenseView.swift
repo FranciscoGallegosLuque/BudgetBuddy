@@ -11,7 +11,7 @@ import SwiftUI
 struct ExpenseView: View {
     @Environment(\.modelContext) var modelContext
     @Query var expenses: [ExpenseItem]
-    var expenseType: ExpenseType?
+    var category: Category?
     var expensesGroupedByDay: [Date: [ExpenseItem]] {
         Dictionary(grouping: expenses) { expense in
             Calendar.current.startOfDay(for: expense.date)
@@ -29,7 +29,7 @@ struct ExpenseView: View {
 
 #Preview {
     ExpenseView(
-        expenseType: nil,
+        category: nil,
         sortOrder: [SortDescriptor(\ExpenseItem.name)]
     )
     .modelContainer(PreviewSampleData.sampleExpenses())
@@ -37,11 +37,11 @@ struct ExpenseView: View {
 
 extension ExpenseView {
 
-    init(expenseType: ExpenseType?, sortOrder: [SortDescriptor<ExpenseItem>]) {
-        if let expenseType {
+    init(category: Category?, sortOrder: [SortDescriptor<ExpenseItem>]) {
+        if let category {
             _expenses = Query(
                 filter: #Predicate<ExpenseItem> { expense in
-                    expense.typeRaw == expenseType.rawValue
+                    expense.categoryRaw == category.rawValue
                 },
                 sort: sortOrder
             )
@@ -51,13 +51,13 @@ extension ExpenseView {
             )
         }
 
-        self.expenseType = expenseType
+        self.category = category
     }
 
     @ViewBuilder
     private var conditionalView: some View {
         if expenses.isEmpty {
-            NoExpensesView(expenseType: expenseType)
+            NoExpensesView(category: category)
         } else {
             listView
 
@@ -74,7 +74,7 @@ extension ExpenseView {
                             .accessibilityLabel(
                                 "\(expense.name), costs \(expense.amount)"
                             )
-                            .accessibilityHint(expense.type.displayName)
+                            .accessibilityHint(expense.category.displayName)
                     }
                     .onDelete { indexSet in
                         for index in indexSet {
@@ -107,7 +107,7 @@ extension ExpenseView {
         VStack(alignment: .leading) {
             Text(expense.name)
                 .font(.headline)
-            Text(expense.type.displayIconAndName)
+            Text(expense.category.displayIconAndName)
                 .font(.subheadline)
         }
     }

@@ -17,7 +17,7 @@ struct AddView: View {
 
     @State private var name = ""
     @State private var date: Date = .now
-    @State private var type: ExpenseType = .food
+    @State private var category: Category = .food
     @State private var account: Account = .cash
     @State private var amount: Double? = nil
 
@@ -72,9 +72,9 @@ extension AddView {
 
     
     private var categoryField: some View {
-        Picker("Category", selection: $type) {
-            ForEach(ExpenseType.allCases, id: \.self) { type in
-                Text(type.displayIcon + " " + type.displayName).tag(type)
+        Picker("Category", selection: $category) {
+            ForEach(Category.allCases, id: \.self) { category in
+                Text(category.displayIcon + " " + category.displayName).tag(category)
                 }
         }
     }
@@ -104,7 +104,7 @@ extension AddView {
         Button("Save") {
             let item = ExpenseItem(
                 name: name,
-                type: type,
+                category: category,
                 account: account,
                 amount: amount ?? 0,
                 date: date

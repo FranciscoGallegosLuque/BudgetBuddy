@@ -19,35 +19,35 @@ struct PreviewSampleData {
             let mockExpenses = [
                 ExpenseItem(
                     name: "Coffee",
-                    type: .food,
+                    category: .food,
                     account: .cash,
                     amount: 3.50,
                     date: .now
                 ),
                 ExpenseItem(
                     name: "Concert Ticket",
-                    type: .culture,
+                    category: .culture,
                     account: .cash,
                     amount: 50,
                     date: .now
                 ),
                 ExpenseItem(
                     name: "Taxi",
-                    type: .transport,
+                    category: .transport,
                     account: .credit,
                     amount: 12,
                     date: .now
                 ),
                 ExpenseItem(
                     name: "Bus",
-                    type: .transport,
+                    category: .transport,
                     account: .debit,
                     amount: 12,
                     date: Date.from(year: 2025, month: 9, day: 19) ?? .now
                 ),
                 ExpenseItem(
                     name: "Bus",
-                    type: .transport,
+                    category: .transport,
                     account: .cash,
                     amount: 12,
                     date: Date.from(year: 2025, month: 9, day: 20) ?? .now

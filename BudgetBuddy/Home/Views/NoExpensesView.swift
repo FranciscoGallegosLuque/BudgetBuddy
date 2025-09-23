@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct NoExpensesView: View {
-    var expenseType: ExpenseType? 
+    var category: Category?
 
     var body: some View {
         VStack(spacing: Layout.spacing) {
@@ -21,7 +21,7 @@ struct NoExpensesView: View {
 }
 
 #Preview {
-    NoExpensesView(expenseType: .culture)
+    NoExpensesView(category: .culture)
 }
 
 private enum Layout {
@@ -47,8 +47,8 @@ extension NoExpensesView {
     }
     
     private var titleText: String {
-        if let expenseType = self.expenseType {
-            "No \(expenseType.displayName.lowercased()) expenses yet!"
+        if let category = self.category {
+            "No \(category.displayName.lowercased()) expenses yet!"
         } else {
             "No expenses yet!"
         }
@@ -61,8 +61,8 @@ extension NoExpensesView {
     }
     
     private var descriptionText: String  {
-        if let expenseType = self.expenseType {
-            "Add your first \(expenseType.displayName.lowercased()) expense below or change the filters applied"
+        if let category = self.category {
+            "Add your first \(category.displayName.lowercased()) expense below or change the filters applied"
         } else {
             "Add your first expense below"
         }
