@@ -31,4 +31,8 @@ extension ExpenseType {
         case .household: return "🪑"
         }
     }
+    
+    var displayIconAndName: String {
+        "\(self.displayIcon) \(self.displayName)"
+    }
 }

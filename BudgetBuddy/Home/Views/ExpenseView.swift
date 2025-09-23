@@ -26,6 +26,17 @@ struct ExpenseView: View {
     var body: some View {
         conditionalView
     }
+}
+
+#Preview {
+    ExpenseView(
+        expenseType: nil,
+        sortOrder: [SortDescriptor(\ExpenseItem.name)]
+    )
+    .modelContainer(PreviewSampleData.sampleExpenses())
+}
+
+extension ExpenseView {
 
     init(expenseType: ExpenseType?, sortOrder: [SortDescriptor<ExpenseItem>]) {
         if let expenseType {
@@ -41,17 +52,6 @@ struct ExpenseView: View {
             )
         }
     }
-}
-
-#Preview {
-    ExpenseView(
-        expenseType: nil,
-        sortOrder: [SortDescriptor(\ExpenseItem.name)]
-    )
-    .modelContainer(PreviewSampleData.sampleExpenses())
-}
-
-extension ExpenseView {
 
     @ViewBuilder
     private var conditionalView: some View {
@@ -68,33 +68,12 @@ extension ExpenseView {
             ForEach(sortedGroup, id: \.key) { day, expensesInDay in
                 Section(header: Text(day.dayMonthYear)) {
                     ForEach(expensesInDay) { expense in
-                        HStack {
-                            HStack {
-                                Text(expense.date.shortMonthDay)
-                                Divider()
-                                VStack(alignment: .leading) {
-                                    Text(expense.name)
-                                        .font(.headline)
-                                    HStack {
-                                        Text(expense.type.displayIcon)
-                                        Text(expense.type.displayName)
-                                    }
-                                }
-                            }
-                            Spacer()
-                            Text(
-                                expense.amount,
-                                format: .currency(
-                                    code: Locale.current.currency?.identifier
-                                        ?? "USD"
-                                )
+                        rowContent(for: expense)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(
+                                "\(expense.name), costs \(expense.amount)"
                             )
-                        }
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(
-                            "\(expense.name), costs \(expense.amount)"
-                        )
-                        .accessibilityHint(expense.type.displayName)
+                            .accessibilityHint(expense.type.displayName)
                     }
                     .onDelete { indexSet in
                         for index in indexSet {
@@ -105,6 +84,41 @@ extension ExpenseView {
                 }
             }
         }
+    }
+
+    private func rowContent(for expense: ExpenseItem) -> some View {
+        HStack {
+            HStack {
+                dateText(for: expense)
+                Divider()
+                expenseDetailsText(for: expense)
+            }
+            Spacer()
+            amountText(for: expense)
+        }
+    }
+
+    private func dateText(for expense: ExpenseItem) -> some View {
+        Text(expense.date.shortMonthDayTwoLines)
+    }
+
+    private func expenseDetailsText(for expense: ExpenseItem) -> some View {
+        VStack(alignment: .leading) {
+            Text(expense.name)
+                .font(.headline)
+            Text(expense.type.displayIconAndName)
+                .font(.subheadline)
+        }
+    }
+
+    private func amountText(for expense: ExpenseItem) -> some View {
+        Text(
+            expense.amount,
+            format: .currency(
+                code: Locale.current.currency?.identifier
+                    ?? "USD"
+            )
+        )
     }
 
 }
