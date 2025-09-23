@@ -35,6 +35,18 @@ struct PreviewSampleData {
                     amount: 12,
                     date: .now
                 ),
+                ExpenseItem(
+                    name: "Bus",
+                    type: .transport,
+                    amount: 12,
+                    date: Date.from(year: 2025, month: 9, day: 19) ?? .now
+                ),
+                ExpenseItem(
+                    name: "Bus",
+                    type: .transport,
+                    amount: 12,
+                    date: Date.from(year: 2025, month: 9, day: 20) ?? .now
+                ),
             ]
 
             for mockExpense in mockExpenses {

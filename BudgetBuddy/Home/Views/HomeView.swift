@@ -34,7 +34,7 @@ struct HomeView: View {
                     ToolbarItemGroup(placement: .topBarLeading) {
                         if !noExpensesAdded {
                             filterButton
-                            sortButton
+//                            sortButton
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {

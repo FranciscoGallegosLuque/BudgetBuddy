@@ -13,6 +13,16 @@ struct ExpenseView: View {
     @Query var expenses: [ExpenseItem]
     var expenseType: ExpenseType? = nil
 
+    var expensesGroupedByDay: [Date: [ExpenseItem]] {
+        Dictionary(grouping: expenses) { expense in
+            Calendar.current.startOfDay(for: expense.date)
+        }
+    }
+
+    var sortedGroup: [(key: Date, value: [ExpenseItem])] {
+        expensesGroupedByDay.sorted { $0.key > $1.key }
+    }
+
     var body: some View {
         conditionalView
     }
@@ -30,15 +40,6 @@ struct ExpenseView: View {
                 sort: sortOrder
             )
         }
-        self.expenseType = expenseType
-    }
-
-
-    func removeItems(at offsets: IndexSet) {
-        for offset in offsets {
-            let expense = expenses[offset]
-            modelContext.delete(expense)
-        }
     }
 }
 
@@ -51,47 +52,59 @@ struct ExpenseView: View {
 }
 
 extension ExpenseView {
-    
+
     @ViewBuilder
     private var conditionalView: some View {
         if expenses.isEmpty {
             NoExpensesView(expenseType: expenseType)
         } else {
             listView
-    
+
         }
     }
-    
+
     private var listView: some View {
         List {
-            ForEach(expenses) { expense in
-                HStack {
-                    HStack {
-                        Text(expense.date.shortMonthDay)
-                        Divider ()
-                        VStack(alignment: .leading) {
-                            Text(expense.name)
-                                .font(.headline)
+            ForEach(sortedGroup, id: \.key) { day, expensesInDay in
+                Section(header: Text(day.dayMonthYear)) {
+                    ForEach(expensesInDay) { expense in
+                        HStack {
                             HStack {
-                                Text(expense.type.displayIcon)
-                                Text(expense.type.displayName)
+                                Text(expense.date.shortMonthDay)
+                                Divider()
+                                VStack(alignment: .leading) {
+                                    Text(expense.name)
+                                        .font(.headline)
+                                    HStack {
+                                        Text(expense.type.displayIcon)
+                                        Text(expense.type.displayName)
+                                    }
+                                }
                             }
+                            Spacer()
+                            Text(
+                                expense.amount,
+                                format: .currency(
+                                    code: Locale.current.currency?.identifier
+                                        ?? "USD"
+                                )
+                            )
+                        }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(
+                            "\(expense.name), costs \(expense.amount)"
+                        )
+                        .accessibilityHint(expense.type.displayName)
+                    }
+                    .onDelete { indexSet in
+                        for index in indexSet {
+                            let expenseToDelete = expensesInDay[index]
+                            modelContext.delete(expenseToDelete)
                         }
                     }
-                    Spacer()
-                    Text(
-                        expense.amount,
-                        format: .currency(
-                            code: Locale.current.currency?.identifier ?? "USD"
-                        )
-                    )
                 }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(expense.name), costs \(expense.amount)")
-                .accessibilityHint(expense.type.displayName)
             }
-            .onDelete(perform: removeItems)
         }
     }
-    
+
 }
