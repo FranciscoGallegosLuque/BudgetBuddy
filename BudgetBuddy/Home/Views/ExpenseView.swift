@@ -11,7 +11,7 @@ import SwiftUI
 struct ExpenseView: View {
     @Environment(\.modelContext) var modelContext
     @Query var expenses: [ExpenseItem]
-    var expenseType: ExpenseType? = nil
+    var expenseType: ExpenseType?
 
     var expensesGroupedByDay: [Date: [ExpenseItem]] {
         Dictionary(grouping: expenses) { expense in
@@ -51,6 +51,7 @@ extension ExpenseView {
                 sort: sortOrder
             )
         }
+        self.expenseType = expenseType
     }
 
     @ViewBuilder
