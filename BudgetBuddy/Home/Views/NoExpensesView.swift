@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct NoExpensesView: View {
-    var expenseType: ExpenseType? = nil
+    var expenseType: ExpenseType? 
 
     var body: some View {
         VStack(spacing: Layout.spacing) {
