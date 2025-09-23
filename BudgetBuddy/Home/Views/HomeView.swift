@@ -58,7 +58,7 @@ extension HomeView {
 
     @ViewBuilder
     private var conditionalView: some View {
-        if expenses.isEmpty {
+        if noExpensesAdded {
             NoExpensesView()
         } else {
             ExpenseView(
