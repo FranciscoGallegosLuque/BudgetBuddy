@@ -38,14 +38,10 @@ struct ExpenseEditor: View {
 
             }
             .navigationTitle(expense == nil ? "Add Expense" : "Edit Expense")
-            .navigationBarBackButtonHidden()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     saveButton
-                }
-                ToolbarItem(placement: .topBarLeading) {
-                    cancelButton
                 }
             }
             .onAppear {
