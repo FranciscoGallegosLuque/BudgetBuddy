@@ -12,6 +12,11 @@ struct HomeView: View {
     @Environment(\.modelContext) var modelContext
     @Query var expenses: [ExpenseItem]
     @State private var categoryShowed: Category?
+    @State private var expensesTimeSpam: TimeSpam = .daily
+    @State private var displayedMonth: Date = Calendar.current.date(from: Calendar.current.dateComponents(
+        [.year, .month],
+        from: Date.now
+    )) ?? .now
     
     @State private var sortOrder = [
         SortDescriptor(\ExpenseItem.date, order: .reverse),
@@ -23,16 +28,34 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0){
+                Picker("", selection: $expensesTimeSpam) {
+                    Text("Daily").tag(TimeSpam.daily)
+                    Text("Monthly").tag(TimeSpam.monthly)
+                }
+                .pickerStyle(.segmented)
+                .padding()
+                Divider()
+                HStack {
+                    HStack {
+                        Image(systemName: "chevron.left").onTapGesture {
+                            changeMonth(ascending: false)
+                        }
+                        Spacer()
+                        Text(displayedMonth.monthAndYear)
+                        Spacer()
+                        Image(systemName: "chevron.right").onTapGesture {
+                            changeMonth(ascending: true)
+                        }
+                    }
+                }
+                .padding(10)
+                Divider()
                 conditionalView
             }
-                .safeAreaInset(edge: .top, spacing: 0) {
-                    Color.clear.frame(height: 25)
-                }
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         if !expenses.isEmpty {
                             filterButton
-//                            sortButton
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
@@ -61,7 +84,8 @@ extension HomeView {
         } else {
             ExpenseView(
                 category: categoryShowed,
-                sortOrder: sortOrder
+                sortOrder: sortOrder,
+                displayedMonth: displayedMonth
             )
             
       }
@@ -120,5 +144,21 @@ extension HomeView {
             }
         }
     }
+    
+    private func changeMonth(ascending: Bool) {
+        let sign = 1
+        var components = Calendar.current.dateComponents(
+            [.year, .month],
+            from: displayedMonth
+        )
+        components.month = (components.month ?? 1) + (ascending ? sign : -sign)
+        let newDate = Calendar.current.date(from: components) ?? .now
+        displayedMonth = newDate
+    }
 
+}
+
+enum TimeSpam: String {
+    case daily
+    case monthly
 }

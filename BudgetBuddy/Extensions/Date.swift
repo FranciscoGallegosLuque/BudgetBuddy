@@ -20,6 +20,24 @@ extension Date {
         return formatter.string(from: self)
     }
     
+    var day: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd"
+        return formatter.string(from: self)
+    }
+    
+    var weekDay: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE"
+        return formatter.string(from: self)
+    }
+    
+    var monthAndYear: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter.string(from: self)
+    }
+    
     /// Create a date from specified parameters
         ///
         /// - Parameters:
