@@ -23,7 +23,11 @@ struct ExpenseView: View {
     }
 
     var body: some View {
-        conditionalView
+        if expenses.isEmpty {
+            NoExpensesView(category: category)
+        } else {
+            listView
+        }
     }
 }
 
@@ -54,32 +58,30 @@ extension ExpenseView {
         self.category = category
     }
 
-    @ViewBuilder
-    private var conditionalView: some View {
-        if expenses.isEmpty {
-            NoExpensesView(category: category)
-        } else {
-            listView
-
-        }
-    }
-
     private var listView: some View {
         List {
             ForEach(sortedGroup, id: \.key) { day, expensesInDay in
                 Section(header: Text(day.dayMonthYear)) {
                     ForEach(expensesInDay) { expense in
-                        rowContent(for: expense)
-                            .accessibilityElement(children: .ignore)
-                            .accessibilityLabel(
-                                "\(expense.name), costs \(expense.amount)"
-                            )
-                            .accessibilityHint(expense.category.displayName)
+                        NavigationLink {
+                            ExpenseEditor(expense: expense)
+                        } label: {
+                            rowContent(for: expense)
+                        }
+                        
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(
+                            "\(expense.name), costs \(expense.amount)"
+                        )
+                        .accessibilityHint(expense.category.displayName)
+                           
                     }
                     .onDelete { indexSet in
                         for index in indexSet {
                             let expenseToDelete = expensesInDay[index]
-                            modelContext.delete(expenseToDelete)
+                            withAnimation {
+                                modelContext.delete(expenseToDelete)
+                            }
                         }
                     }
                 }
@@ -89,11 +91,7 @@ extension ExpenseView {
 
     private func rowContent(for expense: ExpenseItem) -> some View {
         HStack {
-            HStack {
-                dateText(for: expense)
-                Divider()
-                expenseDetailsText(for: expense)
-            }
+            expenseDetailsText(for: expense)
             Spacer()
             amountText(for: expense)
         }

@@ -70,7 +70,7 @@ extension NoExpensesView {
     
     private var addExpenseButton: some View {
         NavigationLink(
-            destination: AddView(),
+            destination: ExpenseEditor(expense: nil),
             label: {
                 Text("Add an expense")
                     .foregroundStyle(.white)

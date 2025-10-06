@@ -29,7 +29,7 @@ struct HomeView: View {
                     Color.clear.frame(height: 25)
                 }
                 .toolbar {
-                    ToolbarItemGroup(placement: .topBarLeading) {
+                    ToolbarItem(placement: .topBarLeading) {
                         if !expenses.isEmpty {
                             filterButton
 //                            sortButton
@@ -69,7 +69,7 @@ extension HomeView {
 
     private var expenseButton: some View {
         NavigationLink("+") {
-            AddView()
+            ExpenseEditor(expense: nil)
         }
         .font(.title)
     }
@@ -81,29 +81,14 @@ extension HomeView {
                 "slider.horizontal.3"
         ) {
             Picker("Filter", selection: $categoryShowed) {
-                Text("Food expenses")
-                    .tag(Category.food as Category?)
-
-                Text("Social expenses")
-                    .tag(Category.social as Category?)
-                
-                Text("Transport expenses")
-                    .tag(Category.transport as Category?)
-
-                Text("Culture expenses")
-                    .tag(Category.culture as Category?)
-                
-                Text("Household expenses")
-                    .tag(Category.household as Category?)
-
-                Text("Education expenses")
-                    .tag(Category.education as Category?)
-                
-                Text("Gift expenses")
-                    .tag(Category.gift as Category?)
-
-                Text("Remove filters")
-                    .tag(nil as Category?)
+                Text("All expenses").tag(nil as Category?)
+                Text("Food expenses").tag(Category.food as Category?)
+                Text("Social expenses").tag(Category.social as Category?)
+                Text("Transport expenses").tag(Category.transport as Category?)
+                Text("Culture expenses").tag(Category.culture as Category?)
+                Text("Household expenses").tag(Category.household as Category?)
+                Text("Education expenses").tag(Category.education as Category?)
+                Text("Gift expenses").tag(Category.gift as Category?)
             }
         }
     }
