@@ -8,13 +8,15 @@
 import SwiftUI
 import SwiftData
 
-struct AddView: View {
+struct ExpenseEditor: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @Query var expenses: [ExpenseItem]
     
     private var disableForm: Bool { name.isEmpty || amount == nil }
 
+    let expense: ExpenseItem?
+    
     @State private var name = ""
     @State private var date: Date = .now
     @State private var category: Category = .food
@@ -35,7 +37,7 @@ struct AddView: View {
                 }
 
             }
-            .navigationTitle("Add Expense")
+            .navigationTitle(expense == nil ? "Add Expense" : "Edit Expense")
             .navigationBarBackButtonHidden()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -46,14 +48,23 @@ struct AddView: View {
                     cancelButton
                 }
             }
+            .onAppear {
+                if let expense {
+                    name = expense.name
+                    date = expense.date
+                    category = expense.category
+                    account = expense.account
+                    amount = expense.amount
+                }
+            }
         }
     }
 }
 #Preview {
-    AddView()
+    ExpenseEditor(expense: nil)
 }
 
-extension AddView {
+extension ExpenseEditor {
     
     private var expenseNameField: some View {
         TextField("Add expense name", text: $name)
@@ -101,15 +112,24 @@ extension AddView {
     }
     
     private var saveButton: some View {
+
         Button("Save") {
-            let item = ExpenseItem(
-                name: name,
-                category: category,
-                account: account,
-                amount: amount ?? 0,
-                date: date
-            )
-            modelContext.insert(item)
+            if let expense {
+                expense.name = name
+                expense.category = category
+                expense.account = account
+                expense.amount = amount ?? 0
+                expense.date = date
+            } else {
+                let item = ExpenseItem(
+                    name: name,
+                    category: category,
+                    account: account,
+                    amount: amount ?? 0,
+                    date: date
+                )
+                modelContext.insert(item)
+            }
             dismiss()
         }
         .disabled(disableForm)
