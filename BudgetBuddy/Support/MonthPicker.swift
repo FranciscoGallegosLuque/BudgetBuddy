@@ -16,16 +16,28 @@ struct MonthPicker: View {
 
     private var years: [Int] {
         let currentYear = Calendar.current.component(.year, from: Date())
-        return Array((currentYear - 100)...(currentYear + 100))
+        return Array((currentYear - Layout.yearsRange)...(currentYear + Layout.yearsRange))
     }
 
     var body: some View {
         VStack {
-            Text("This month")
-                .fontWeight(.bold)
-                .padding(.top, 15)
-                .padding(.bottom, 0)
-                .onTapGesture {
+            currentMonthButton
+            HStack {
+                monthPicker
+                yearPicker
+            }
+        }
+    }
+}
+
+extension MonthPicker {
+    
+    private var currentMonthButton: some View {
+        Text("This month")
+            .fontWeight(.bold)
+            .padding(.top, Layout.CurrentMonthButton.topPadding)
+            .padding(.bottom, Layout.CurrentMonthButton.bottomPadding)
+            .onTapGesture {
                 withAnimation {
                     selectedMonth = Calendar.current.date(from: Calendar.current.dateComponents(
                         [.year, .month],
@@ -33,26 +45,26 @@ struct MonthPicker: View {
                     )) ?? .now
                 }
             }
-            HStack {
-                Picker("Month", selection: monthBinding) {
-                    ForEach(0..<months.count, id: \.self) { index in
-                        Text(months[index]).tag(index)
-                    }
-                }
-                .pickerStyle(.wheel)
-
-                Picker("Year", selection: yearBinding) {
-                    ForEach(years, id: \.self) { year in
-                        Text(String(year)).tag(year)
-                    }
-                }
-                .pickerStyle(.wheel)
-            }
-            .frame(height: 200)
-            .padding(0)
-        }
     }
-
+    
+    private var monthPicker: some View {
+        Picker("Month", selection: monthBinding) {
+            ForEach(0..<months.count, id: \.self) { index in
+                Text(months[index]).tag(index)
+            }
+        }
+        .pickerStyle(.wheel)
+    }
+    
+    private var yearPicker: some View {
+        Picker("Year", selection: yearBinding) {
+            ForEach(years, id: \.self) { year in
+                Text(String(year)).tag(year)
+            }
+        }
+        .pickerStyle(.wheel)
+    }
+    
     // MARK: - Bindings
     private var monthBinding: Binding<Int> {
         Binding(
@@ -85,4 +97,14 @@ struct MonthPicker: View {
 
 #Preview {
     MonthPicker(selectedMonth: .constant(.now))
+}
+
+private enum Layout {
+    static let yearsRange: Int = 100
+    
+    enum CurrentMonthButton {
+        static let topPadding: CGFloat = 15
+        static let bottomPadding: CGFloat = 0
+    }
+    
 }

@@ -8,7 +8,7 @@
 import SwiftData
 import SwiftUI
 
-struct ExpenseView: View {
+struct DailyExpensesListView: View {
     @Environment(\.modelContext) var modelContext
     @Query var expenses: [ExpenseItem]
     var category: Category?
@@ -49,9 +49,9 @@ struct ExpenseView: View {
 }
 
 #Preview {
-    ExpenseView(
+    DailyExpensesListView(
         category: nil,
-        sortOrder: [SortDescriptor(\ExpenseItem.name)],
+//        sortOrder: [SortDescriptor(\ExpenseItem.name)],
         displayedMonth: Calendar.current.date(from: Calendar.current.dateComponents(
             [.year, .month],
             from: Date.now
@@ -60,20 +60,18 @@ struct ExpenseView: View {
     .modelContainer(PreviewSampleData.sampleExpenses())
 }
 
-extension ExpenseView {
+extension DailyExpensesListView {
 
-    init(category: Category?, sortOrder: [SortDescriptor<ExpenseItem>], displayedMonth: Date) {
+    init(category: Category?,/* sortOrder: [SortDescriptor<ExpenseItem>],*/ displayedMonth: Date) {
         if let category {
             _expenses = Query(
                 filter: #Predicate<ExpenseItem> { expense in
                     expense.categoryRaw == category.rawValue
-                },
-                sort: sortOrder
+                }
+//                ,sort: sortOrder
             )
         } else {
-            _expenses = Query(
-                sort: sortOrder
-            )
+            _expenses = Query(/*sort: sortOrder*/)
         }
 
         self.category = category
@@ -83,24 +81,9 @@ extension ExpenseView {
     private var listView: some View {
         List {
             ForEach(sortedGroup, id: \.key) { day, expensesInDay in
-                Section(
-                    header: HStack(alignment: .center) {
-                        Text(day.day).bold()
-                        Text(day.weekDay).font(.footnote)
-                    }
-                ) {
+                Section(header: dayHeader(for: day)) {
                     ForEach(expensesInDay) { expense in
-                        ZStack(alignment: .leading) {
-                            NavigationLink {
-                                ExpenseEditor(expense: expense)
-                            } label: {
-                                EmptyView()
-                                    .opacity(0)
-                            }
-                            rowContent(for: expense)
-                                .padding(.vertical, 4)
-                        }
-
+                        row(for: expense)
                     }
                     .onDelete { indexSet in
                         for index in indexSet {
@@ -115,6 +98,25 @@ extension ExpenseView {
         }
         .listStyle(.plain)
     }
+    
+    private func dayHeader(for day: Date) -> some View {
+        HStack(alignment: .center) {
+            Text(day.day).bold()
+            Text(day.weekDay).font(.footnote)
+        }
+    }
+    
+    private func row(for expense: ExpenseItem) -> some View {
+        ZStack(alignment: .leading) {
+            NavigationLink {
+                ExpenseEditor(expense: expense)
+            } label: {
+                EmptyView()
+                    .opacity(Layout.Row.opacity)
+            }
+            rowContent(for: expense)
+        }
+    }
 
     private func rowContent(for expense: ExpenseItem) -> some View {
         HStack(alignment: .firstTextBaseline) {
@@ -122,6 +124,7 @@ extension ExpenseView {
             Spacer()
             amountText(for: expense)
         }
+        .padding(.vertical, Layout.Row.contentPadding)
     }
 
     private func dateText(for expense: ExpenseItem) -> some View {
@@ -136,7 +139,6 @@ extension ExpenseView {
                 .font(.title3).fontWeight(.bold)
             Text(expense.account.rawValue.capitalized).font(.caption2)
                 .fontWeight(.light)
-
         }
     }
 
@@ -152,5 +154,11 @@ extension ExpenseView {
             .font(.headline)
         }
     }
+}
 
+private enum Layout {
+    enum Row {
+        static let opacity: CGFloat = 0
+        static let contentPadding: CGFloat = 4
+    }
 }

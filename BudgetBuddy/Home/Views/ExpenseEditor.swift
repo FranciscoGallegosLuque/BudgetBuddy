@@ -35,24 +35,11 @@ struct ExpenseEditor: View {
                     accountField
                     amountField
                 }
-
             }
             .navigationTitle(expense == nil ? "Add Expense" : "Edit Expense")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    saveButton
-                }
-            }
-            .onAppear {
-                if let expense {
-                    name = expense.name
-                    date = expense.date
-                    category = expense.category
-                    account = expense.account
-                    amount = expense.amount
-                }
-            }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { saveButton } }
+            .onAppear { if let expense { loadCurrentExpenseValues(for: expense) } }
         }
     }
 }
@@ -61,6 +48,14 @@ struct ExpenseEditor: View {
 }
 
 extension ExpenseEditor {
+    
+    private func loadCurrentExpenseValues(for expense: ExpenseItem) {
+        name = expense.name
+        date = expense.date
+        category = expense.category
+        account = expense.account
+        amount = expense.amount
+    }
     
     private var expenseNameField: some View {
         TextField("Add expense name", text: $name)
@@ -74,7 +69,6 @@ extension ExpenseEditor {
                 selection: $date,
                 displayedComponents: [.date]
             )
-//            .datePickerStyle(.graphical)
     }
 
     
@@ -96,46 +90,44 @@ extension ExpenseEditor {
     
     private var amountField: some View {
         HStack {
-            Text("$")
+            Text(Locale.current.currencySymbol ?? "$")
             TextField(
                 "0.00",
                 value: $amount,
                 format: .number
-                
             )
             .keyboardType(.decimalPad)
         }
     }
     
     private var saveButton: some View {
-
         Button("Save") {
             if let expense {
-                expense.name = name
-                expense.category = category
-                expense.account = account
-                expense.amount = amount ?? 0
-                expense.date = date
+                saveEditedExpense(expense: expense)
             } else {
-                let item = ExpenseItem(
-                    name: name,
-                    category: category,
-                    account: account,
-                    amount: amount ?? 0,
-                    date: date
-                )
-                modelContext.insert(item)
+                saveNewExpense()
             }
             dismiss()
         }
         .disabled(disableForm)
     }
     
-    private var cancelButton: some View {
-        Button("Cancel") {
-            dismiss()
-        }
-        .tint(.bbDanger)
+    private func saveEditedExpense(expense: ExpenseItem) {
+        expense.name = name
+        expense.category = category
+        expense.account = account
+        expense.amount = amount ?? 0
+        expense.date = date
     }
     
+    private func saveNewExpense() {
+        let item = ExpenseItem(
+            name: name,
+            category: category,
+            account: account,
+            amount: amount ?? 0,
+            date: date
+        )
+        modelContext.insert(item)
+    }
 }
