@@ -24,18 +24,6 @@ struct NoExpensesView: View {
     NoExpensesView(category: .culture)
 }
 
-private enum Layout {
-
-    static let spacing: CGFloat = 10
-    static let bottomPadding: CGFloat = 20
-
-    enum ButtonLayout {
-        static let height: CGFloat = 55
-        static let cornerRadius: CGFloat = 10
-        static let internalPadding: CGFloat = 30
-        static let externalPadding: CGFloat = 30
-    }
-}
 
 extension NoExpensesView {
     
@@ -88,4 +76,17 @@ extension NoExpensesView {
         .padding(.horizontal, Layout.ButtonLayout.internalPadding)
     }
     
+}
+
+
+private enum Layout {
+    static let spacing: CGFloat = 10
+    static let bottomPadding: CGFloat = 20
+
+    enum ButtonLayout {
+        static let height: CGFloat = 55
+        static let cornerRadius: CGFloat = 10
+        static let internalPadding: CGFloat = 30
+        static let externalPadding: CGFloat = 30
+    }
 }

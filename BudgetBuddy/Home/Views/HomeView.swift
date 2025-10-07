@@ -13,68 +13,35 @@ struct HomeView: View {
     @Query var expenses: [ExpenseItem]
     @State private var categoryShowed: Category?
     @State private var expensesTimeSpam: TimeSpam = .daily
-    @State private var displayedMonth: Date = Calendar.current.date(from: Calendar.current.dateComponents(
-        [.year, .month],
-        from: Date.now
-    )) ?? .now
-    
+
+    @State private var displayedMonth: Date =
+        Calendar.current.date(
+            from: Calendar.current.dateComponents(
+                [.year, .month],
+                from: Date.now
+            )
+        ) ?? .now
+
     @State private var showCalendar = false
-    
-    @State private var sortOrder = [
-        SortDescriptor(\ExpenseItem.date, order: .reverse),
-        SortDescriptor(\ExpenseItem.name),
-        SortDescriptor(\ExpenseItem.amount)
-    ]
+
+    //    @State private var sortOrder = [
+    //        SortDescriptor(\ExpenseItem.date, order: .reverse),
+    //        SortDescriptor(\ExpenseItem.name),
+    //        SortDescriptor(\ExpenseItem.amount)
+    //    ]
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0){
-                Picker("", selection: $expensesTimeSpam) {
-                    Text("Daily").tag(TimeSpam.daily)
-                    Text("Monthly").tag(TimeSpam.monthly)
-                }
-                .pickerStyle(.segmented)
-                .padding()
-                Divider()
-                HStack {
-                    HStack {
-                        Image(systemName: "chevron.left").onTapGesture {
-                            changeMonth(ascending: false)
-                        }
-                        Spacer()
-                        Button(displayedMonth.monthAndYear) {
-                            showCalendar.toggle()
-                        }
-                        .popover(isPresented: $showCalendar) {
-                            MonthPicker(selectedMonth: $displayedMonth)
-                                .presentationCompactAdaptation(.popover)
-                        }
-                        
-                        
-                        Spacer()
-                        Image(systemName: "chevron.right").onTapGesture {
-                            changeMonth(ascending: true)
-                        }
-                    }
-                }
-                .padding(10)
-                Divider()
-                conditionalView
+            VStack {
+                timeSpanPicker
+                monthSelector
+                expensesContent
             }
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        if !expenses.isEmpty {
-                            filterButton
-                        }
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        if !expenses.isEmpty {
-                            expenseButton
-                        }
-                    }
-                }
-                .navigationTitle("BudgetBuddy")
-                
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) { if !expenses.isEmpty { filterButton } }
+                ToolbarItem(placement: .topBarTrailing) { if !expenses.isEmpty { addExpenseButton } }
+            }
+            .navigationTitle("Budget Buddy")
         }
     }
 }
@@ -87,21 +54,24 @@ struct HomeView: View {
 extension HomeView {
 
     @ViewBuilder
-    private var conditionalView: some View {
+    private var expensesContent: some View {
         if expenses.isEmpty {
             NoExpensesView()
-        } else {
-            ExpenseView(
+        } else if expensesTimeSpam == .daily {
+            DailyExpensesListView(
                 category: categoryShowed,
-                sortOrder: sortOrder,
                 displayedMonth: displayedMonth
             )
-            
-      }
+        } else {
+            VStack {
+                NoExpensesView()
+            }
+            .frame(maxHeight: .infinity)
+        }
     }
 
-    private var expenseButton: some View {
-        NavigationLink("+") {
+    private var addExpenseButton: some View {
+        NavigationLink(Layout.AddExpenseButton.icon) {
             ExpenseEditor(expense: nil)
         }
         .font(.title)
@@ -125,49 +95,88 @@ extension HomeView {
             }
         }
     }
-
-    private var sortButton: some View {
-        Menu("", systemImage: "arrow.up.arrow.down") {
-            Picker("Sort", selection: $sortOrder) {
-                Text("Sort by Name")
-                    .tag([
-                        SortDescriptor(\ExpenseItem.name),
-                        SortDescriptor(\ExpenseItem.amount),
-                        SortDescriptor(\ExpenseItem.date)
-                    ])
-
-                Text("Sort by Amount")
-                    .tag([
-                        SortDescriptor(\ExpenseItem.amount),
-                        SortDescriptor(\ExpenseItem.name),
-                        SortDescriptor(\ExpenseItem.date),
-
-                        
-                    ])
-                Text("Sort by Date")
-                    .tag([
-                        SortDescriptor(\ExpenseItem.date, order: .reverse),
-                        SortDescriptor(\ExpenseItem.amount),
-                        SortDescriptor(\ExpenseItem.name),
-                    ])
+    
+    @ViewBuilder
+    private var monthSelector: some View {
+        Divider()
+        HStack {
+            Image(systemName: Layout.MonthSelection.leftIcon).onTapGesture { changeMonth(ascending: false) }
+            Spacer()
+            Button(displayedMonth.monthAndYear) {
+                showCalendar.toggle()
             }
+            .popover(isPresented: $showCalendar) {
+                MonthPicker(selectedMonth: $displayedMonth).presentationCompactAdaptation(.popover)
+            }
+            Spacer()
+            Image(systemName: Layout.MonthSelection.rightIcon).onTapGesture { changeMonth(ascending: true) }
         }
+        .padding(Layout.MonthSelection.padding)
+        Divider()
     }
     
+    private var timeSpanPicker: some View {
+        Picker("", selection: $expensesTimeSpam) {
+            Text(TimeSpam.daily.rawValue.capitalized).tag(TimeSpam.daily)
+            Text(TimeSpam.monthly.rawValue.capitalized).tag(TimeSpam.monthly)
+        }
+        .pickerStyle(.segmented)
+        .padding()
+    }
+
+    //    private var sortButton: some View {
+    //        Menu("", systemImage: "arrow.up.arrow.down") {
+    //            Picker("Sort", selection: $sortOrder) {
+    //                Text("Sort by Name")
+    //                    .tag([
+    //                        SortDescriptor(\ExpenseItem.name),
+    //                        SortDescriptor(\ExpenseItem.amount),
+    //                        SortDescriptor(\ExpenseItem.date)
+    //                    ])
+    //
+    //                Text("Sort by Amount")
+    //                    .tag([
+    //                        SortDescriptor(\ExpenseItem.amount),
+    //                        SortDescriptor(\ExpenseItem.name),
+    //                        SortDescriptor(\ExpenseItem.date),
+    //
+    //
+    //                    ])
+    //                Text("Sort by Date")
+    //                    .tag([
+    //                        SortDescriptor(\ExpenseItem.date, order: .reverse),
+    //                        SortDescriptor(\ExpenseItem.amount),
+    //                        SortDescriptor(\ExpenseItem.name),
+    //                    ])
+    //            }
+    //        }
+    //    }
+
     private func changeMonth(ascending: Bool) {
-        let sign = 1
+        let amount = 1
         var components = Calendar.current.dateComponents(
             [.year, .month],
             from: displayedMonth
         )
-        components.month = (components.month ?? 1) + (ascending ? sign : -sign)
+        components.month = (components.month ?? 1) + (ascending ? amount : -amount)
         let newDate = Calendar.current.date(from: components) ?? .now
         displayedMonth = newDate
     }
-
 }
 
-enum TimeSpam: String {
+private enum Layout {
+    enum AddExpenseButton {
+        static let icon: String = "+"
+    }
+    
+    enum MonthSelection {
+        static let leftIcon: String = "chevron.left"
+        static let rightIcon: String = "chevron.right"
+        static let padding: CGFloat = 10
+    }
+}
+
+private enum TimeSpam: String {
     case daily
     case monthly
 }
