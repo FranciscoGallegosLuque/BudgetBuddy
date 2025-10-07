@@ -18,11 +18,12 @@ struct HomeView: View {
         from: Date.now
     )) ?? .now
     
+    @State private var showCalendar = false
+    
     @State private var sortOrder = [
         SortDescriptor(\ExpenseItem.date, order: .reverse),
         SortDescriptor(\ExpenseItem.name),
         SortDescriptor(\ExpenseItem.amount)
-        
     ]
 
     var body: some View {
@@ -41,7 +42,15 @@ struct HomeView: View {
                             changeMonth(ascending: false)
                         }
                         Spacer()
-                        Text(displayedMonth.monthAndYear)
+                        Button(displayedMonth.monthAndYear) {
+                            showCalendar.toggle()
+                        }
+                        .popover(isPresented: $showCalendar) {
+                            MonthPicker(selectedMonth: $displayedMonth)
+                                .presentationCompactAdaptation(.popover)
+                        }
+                        
+                        
                         Spacer()
                         Image(systemName: "chevron.right").onTapGesture {
                             changeMonth(ascending: true)
