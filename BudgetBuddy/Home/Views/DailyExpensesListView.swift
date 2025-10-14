@@ -9,39 +9,18 @@ import SwiftData
 import SwiftUI
 
 struct DailyExpensesListView: View {
-    @Environment(\.modelContext) var modelContext
-    @Query var expenses: [ExpenseItem]
-    var category: Category?
-    var displayedMonth: Date
-    
-    var expensesGroupedByMonth: [Date: [ExpenseItem]] {
-        Dictionary(grouping: expenses) { expense in
-            let components = Calendar.current.dateComponents(
-                [.year, .month],
-                from: expense.date
-            )
-            return Calendar.current.date(from: components)!
-        }
-    }
-    
-    var monthExpenses: [ExpenseItem] {
-        expensesGroupedByMonth[displayedMonth] ?? []
-    }
+    @Environment(\.modelContext) private var modelContext
+    @State private var viewModel = DailyExpensesListViewModel()
 
-    var expensesGroupedByDay: [Date: [ExpenseItem]] {
-        Dictionary(grouping: monthExpenses) { expense in
-            Calendar.current.startOfDay(for: expense.date)
-        }
-    }
-
+    let expenses: [ExpenseItem]
 
     var sortedGroup: [(key: Date, value: [ExpenseItem])] {
-        expensesGroupedByDay.sorted { $0.key > $1.key }
+        viewModel.filteredExpensesByDay(allExpenses: expenses).sorted { $0.key > $1.key }
     }
 
     var body: some View {
         if expenses.isEmpty {
-            NoExpensesView(category: category)
+            NoExpensesView()
         } else {
             listView
         }
@@ -49,35 +28,10 @@ struct DailyExpensesListView: View {
 }
 
 #Preview {
-    DailyExpensesListView(
-        category: nil,
-//        sortOrder: [SortDescriptor(\ExpenseItem.name)],
-        displayedMonth: Calendar.current.date(from: Calendar.current.dateComponents(
-            [.year, .month],
-            from: Date.now
-        )) ?? .now
-    )
-    .modelContainer(PreviewSampleData.sampleExpenses())
+    DailyExpensesListView(expenses: ExpenseItem.mockExpenses)
 }
 
 extension DailyExpensesListView {
-
-    init(category: Category?,/* sortOrder: [SortDescriptor<ExpenseItem>],*/ displayedMonth: Date) {
-        if let category {
-            _expenses = Query(
-                filter: #Predicate<ExpenseItem> { expense in
-                    expense.categoryRaw == category.rawValue
-                }
-//                ,sort: sortOrder
-            )
-        } else {
-            _expenses = Query(/*sort: sortOrder*/)
-        }
-
-        self.category = category
-        self.displayedMonth = displayedMonth
-    }
-
     private var listView: some View {
         List {
             ForEach(sortedGroup, id: \.key) { day, expensesInDay in
@@ -86,12 +40,7 @@ extension DailyExpensesListView {
                         row(for: expense)
                     }
                     .onDelete { indexSet in
-                        for index in indexSet {
-                            let expenseToDelete = expensesInDay[index]
-                            withAnimation {
-                                modelContext.delete(expenseToDelete)
-                            }
-                        }
+                        viewModel.delete(indexSet, from: expensesInDay, in: modelContext)
                     }
                 }
             }

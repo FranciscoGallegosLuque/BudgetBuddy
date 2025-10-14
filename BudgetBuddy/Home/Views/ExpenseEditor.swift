@@ -11,6 +11,7 @@ import SwiftData
 struct ExpenseEditor: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
+    
     @Query var expenses: [ExpenseItem]
     
     private var disableForm: Bool { name.isEmpty || amount == nil }
