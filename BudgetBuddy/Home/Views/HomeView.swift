@@ -10,25 +10,15 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(\.modelContext) var modelContext
+    @State private var viewModel = HomeViewModel()
+    
     @Query var expenses: [ExpenseItem]
+    
     @State private var categoryShowed: Category?
     @State private var expensesTimeSpam: TimeSpam = .daily
-
-    @State private var displayedMonth: Date =
-        Calendar.current.date(
-            from: Calendar.current.dateComponents(
-                [.year, .month],
-                from: Date.now
-            )
-        ) ?? .now
-
+    
+    @State private var displayedMonth: Date = .startOfCurrentMonth
     @State private var showCalendar = false
-
-    //    @State private var sortOrder = [
-    //        SortDescriptor(\ExpenseItem.date, order: .reverse),
-    //        SortDescriptor(\ExpenseItem.name),
-    //        SortDescriptor(\ExpenseItem.amount)
-    //    ]
 
     var body: some View {
         NavigationStack {
@@ -59,8 +49,7 @@ extension HomeView {
             NoExpensesView()
         } else if expensesTimeSpam == .daily {
             DailyExpensesListView(
-                category: categoryShowed,
-                displayedMonth: displayedMonth
+                expenses: viewModel.filteredExpensesByMonth(allExpenses: expenses, date: displayedMonth)[displayedMonth] ?? []
             )
         } else {
             VStack {
