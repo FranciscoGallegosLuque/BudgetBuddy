@@ -32,6 +32,12 @@ extension Date {
         return formatter.string(from: self)
     }
     
+    var year: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "YYYY"
+        return formatter.string(from: self)
+    }
+    
     var weekDay: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE"
@@ -60,7 +66,19 @@ extension Date {
         return calendar.date(from: dateComponents) ?? nil
     }
     
+    var startOfMonth: Date {
+        Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: self)) ?? .now
+    }
+    
+    var startOfYear: Date {
+        Calendar.current.date(from: Calendar.current.dateComponents([.year], from: self)) ?? .now
+    }
+    
     static var startOfCurrentMonth: Date {
         Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Date())) ?? .now
+    }
+    
+    static var startOfCurrentYear: Date {
+        Calendar.current.date(from: Calendar.current.dateComponents([.year], from: Date())) ?? .now
     }
 }

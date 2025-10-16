@@ -18,13 +18,19 @@ struct HomeView: View {
     @State private var expensesTimeSpam: TimeSpam = .daily
     
     @State private var displayedMonth: Date = .startOfCurrentMonth
+    @State private var displayedYear: Date = .startOfCurrentYear
+    
     @State private var showCalendar = false
 
     var body: some View {
         NavigationStack {
             VStack {
                 timeSpanPicker
-                monthSelector
+                if expensesTimeSpam == .daily {
+                    displayedMonthSelector
+                } else {
+                    displayedYearSelector
+                }
                 expensesContent
             }
             .toolbar {
@@ -48,14 +54,9 @@ extension HomeView {
         if expenses.isEmpty {
             NoExpensesView()
         } else if expensesTimeSpam == .daily {
-            DailyExpensesListView(
-                expenses: viewModel.filteredExpensesByMonth(allExpenses: expenses, date: displayedMonth)[displayedMonth] ?? []
-            )
+            DailyExpensesListView(expenses: viewModel.filteredExpensesByMonth(allExpenses: expenses, date: displayedMonth)[displayedMonth] ?? [])
         } else {
-            VStack {
-                NoExpensesView()
-            }
-            .frame(maxHeight: .infinity)
+            MonthlyExpensesListView(yearExpenses: viewModel.filteredExpensesByYear(allExpenses: expenses, date: displayedYear)[displayedYear] ?? [])
         }
     }
 
@@ -85,23 +86,47 @@ extension HomeView {
         }
     }
     
-    @ViewBuilder
-    private var monthSelector: some View {
-        Divider()
-        HStack {
-            Image(systemName: Layout.MonthSelection.leftIcon).onTapGesture { changeMonth(ascending: false) }
-            Spacer()
-            Button(displayedMonth.monthAndYear) {
-                showCalendar.toggle()
+    private var displayedMonthSelector: some View {
+        VStack {
+            Divider()
+            HStack {
+                Image(systemName: Layout.MonthSelection.leftIcon).onTapGesture { changeMonth(ascending: false) }
+                Spacer()
+                displayedMonthText
+                Spacer()
+                Image(systemName: Layout.MonthSelection.rightIcon).onTapGesture { changeMonth(ascending: true) }
             }
-            .popover(isPresented: $showCalendar) {
-                MonthPicker(selectedMonth: $displayedMonth).presentationCompactAdaptation(.popover)
-            }
-            Spacer()
-            Image(systemName: Layout.MonthSelection.rightIcon).onTapGesture { changeMonth(ascending: true) }
+            .padding(Layout.MonthSelection.padding)
+            Divider()
         }
-        .padding(Layout.MonthSelection.padding)
-        Divider()
+    }
+    
+    private var displayedYearSelector: some View {
+        VStack {
+            Divider()
+            HStack {
+                Image(systemName: Layout.MonthSelection.leftIcon).onTapGesture { changeYear(ascending: false) }
+                Spacer()
+                displayedYearText
+                Spacer()
+                Image(systemName: Layout.MonthSelection.rightIcon).onTapGesture { changeYear(ascending: true) }
+            }
+            .padding(Layout.MonthSelection.padding)
+            Divider()
+        }
+    }
+    
+    private var displayedMonthText: some View {
+        Button(displayedMonth.monthAndYear) {
+            showCalendar.toggle()
+        }
+        .popover(isPresented: $showCalendar) {
+            MonthPicker(selectedMonth: $displayedMonth).presentationCompactAdaptation(.popover)
+        }
+    }
+    
+    private var displayedYearText: some View {
+        Text(displayedYear.year)
     }
     
     private var timeSpanPicker: some View {
@@ -150,6 +175,17 @@ extension HomeView {
         components.month = (components.month ?? 1) + (ascending ? amount : -amount)
         let newDate = Calendar.current.date(from: components) ?? .now
         displayedMonth = newDate
+    }
+    
+    private func changeYear(ascending: Bool) {
+        let amount = 1
+        var components = Calendar.current.dateComponents(
+            [.year],
+            from: displayedYear
+        )
+        components.year = (components.year ?? 1) + (ascending ? amount : -amount)
+        let newDate = Calendar.current.date(from: components) ?? .now
+        displayedYear = newDate
     }
 }
 
