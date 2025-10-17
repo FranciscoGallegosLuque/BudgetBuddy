@@ -8,119 +8,57 @@
 import SwiftData
 import SwiftUI
 
+struct MonthData: Hashable {
+    var displayedMonth: String
+    let totalAmount: Double
+}
+
 struct MonthlyExpensesListView: View {
-    @Environment(\.modelContext) var modelContext
-    @Query var expenses: [ExpenseItem]
-    var category: Category?
-    var displayedMonth: Date
+    @Environment(\.modelContext) private var modelContext
+    private let viewModel: MonthlyExpensesListViewModel = MonthlyExpensesListViewModel()
     
-    var expensesGroupedByMonth: [Date: [ExpenseItem]] {
-        Dictionary(grouping: expenses) { expense in
-            let components = Calendar.current.dateComponents(
-                [.year, .month],
-                from: expense.date
-            )
-            return Calendar.current.date(from: components)!
-        }
+    let yearExpenses: [ExpenseItem]
+    
+    private var displayedMonths: [MonthData] {
+        viewModel.displayedMonthData(from: yearExpenses)
     }
     
-    var monthExpenses: [ExpenseItem] {
-        expensesGroupedByMonth[displayedMonth] ?? []
-    }
-
-    var expensesGroupedByDay: [Date: [ExpenseItem]] {
-        Dictionary(grouping: monthExpenses) { expense in
-            Calendar.current.startOfDay(for: expense.date)
-        }
-    }
-
-
-    var sortedGroup: [(key: Date, value: [ExpenseItem])] {
-        expensesGroupedByDay.sorted { $0.key > $1.key }
+    private var months: [String] {
+        DateFormatter().monthSymbols
     }
 
     var body: some View {
-        if expenses.isEmpty {
-            NoExpensesView(category: category)
-        } else {
-            listView
-        }
+        listView
     }
 }
 
 #Preview {
-    MonthlyExpensesListView(
-        category: nil,
-//        sortOrder: [SortDescriptor(\ExpenseItem.name)],
-        displayedMonth: Calendar.current.date(from: Calendar.current.dateComponents(
-            [.year, .month],
-            from: Date.now
-        )) ?? .now
-    )
-    .modelContainer(PreviewSampleData.sampleExpenses())
+    MonthlyExpensesListView(yearExpenses: ExpenseItem.mockExpenses)
 }
 
 extension MonthlyExpensesListView {
-
-    init(category: Category?,/* sortOrder: [SortDescriptor<ExpenseItem>],*/ displayedMonth: Date) {
-        if let category {
-            _expenses = Query(
-                filter: #Predicate<ExpenseItem> { expense in
-                    expense.categoryRaw == category.rawValue
-                }
-//                ,sort: sortOrder
-            )
-        } else {
-            _expenses = Query(/*sort: sortOrder*/)
-        }
-
-        self.category = category
-        self.displayedMonth = displayedMonth
-    }
-
     private var listView: some View {
         List {
-            ForEach(sortedGroup, id: \.key) { day, expensesInDay in
-                Section(
-                    header: HStack(alignment: .center) {
-                        Text(day.day).bold()
-                        Text(day.weekDay).font(.footnote)
-                    }
-                ) {
-                    ForEach(expensesInDay) { expense in
-                        ZStack(alignment: .leading) {
-                            NavigationLink {
-                                ExpenseEditor(expense: expense)
-                            } label: {
-                                EmptyView()
-                                    .opacity(0)
-                            }
-                            rowContent(for: expense)
-                                .padding(.vertical, 4)
-                        }
-
-                    }
-                    .onDelete { indexSet in
-                        for index in indexSet {
-                            let expenseToDelete = expensesInDay[index]
-                            withAnimation {
-                                modelContext.delete(expenseToDelete)
-                            }
-                        }
-                    }
+            ForEach(displayedMonths, id: \.self) { data in
+                HStack {
+                    Text(data.displayedMonth)
+                        .font(.title3).fontWeight(.bold)
+                    Spacer()
+                    amountText(for: data.totalAmount)
                 }
+                
             }
         }
         .listStyle(.plain)
     }
 
-    private func rowContent(for expense: ExpenseItem) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            expenseDetailsText(for: expense)
-            Spacer()
-            amountText(for: expense)
-        }
-    }
+//    private func rowContent(for expense: ExpenseItem) -> some View {
+//        HStack(alignment: .firstTextBaseline) {
+//            expenseDetailsText(for: expense)
+//            Spacer()
+//            amountText(for: expense)
+//        }
+//    }
 
     private func dateText(for expense: ExpenseItem) -> some View {
         Text(expense.date.shortMonthDayTwoLines)
@@ -138,10 +76,10 @@ extension MonthlyExpensesListView {
         }
     }
 
-    private func amountText(for expense: ExpenseItem) -> some View {
+    private func amountText(for amount: Double) -> some View {
         HStack(alignment: .bottom) {
             Text(
-                expense.amount,
+                amount,
                 format: .currency(
                     code: Locale.current.currency?.identifier
                         ?? "USD"
