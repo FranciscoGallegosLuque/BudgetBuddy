@@ -9,44 +9,35 @@ import Foundation
 import SwiftData
 
 final class MonthlyExpensesListViewModel {
-    func filteredExpensesByMonth(allExpenses: [ExpenseItem]) -> [Date: [ExpenseItem]] {
+    func displayedMonthData(from yearExpenses: [ExpenseItem]) -> [MonthData] {
+        let months = Calendar.current.monthSymbols
+        var monthData: [MonthData] = []
+        let filteredExpensesByMonth = filteredExpensesByMonth(allExpenses: yearExpenses)
+        for month in months {
+            if filteredExpensesByMonth.contains(where: { key, value in
+                key == month
+            }) {
+                monthData.append(MonthData(displayedMonth: month, totalAmount: monthTotalAmount(monthExpenses: filteredExpensesByMonth[month] ?? [])))
+            } else {
+                monthData.append(MonthData(displayedMonth: month, totalAmount: 0))
+            }
+        }
+        return monthData
+    }
+    
+    func filteredExpensesByMonth(allExpenses: [ExpenseItem]) -> [String: [ExpenseItem]] {
         return Dictionary(grouping: allExpenses) { expense in
             let components = Calendar.current.dateComponents(
                 [.year, .month],
                 from: expense.date
             )
-            return Calendar.current.date(from: components) ?? Date()
+            return Calendar.current.date(from: components)?.month ?? "January"
         }
     }
     
-    func monthData(yearExpenses: [ExpenseItem]) -> [MonthData] {
-        var monthData: [MonthData] = []
-        var filteredExpensesByMonth = filteredExpensesByMonth(allExpenses: yearExpenses)
-        var filteredAmountsByMonth = filteredAmountsByMonth(expensesByMonth: filteredExpensesByMonth)
-        for (month, amount) in filteredAmountsByMonth {
-            monthData.append(MonthData(month: month, totalAmount: amount))
-        }
-        return monthData
-    }
-    
-    func filteredAmountsByMonth(expensesByMonth: [Date: [ExpenseItem]]) -> [Date: Double] {
-        var filteredAmounts: [Date: Double] = [:]
-        for month in expensesByMonth.keys {
-            filteredAmounts[month] = amountSpendedByMonth(monthExpenses: expensesByMonth[month] ?? [])
-        }
-        return filteredAmounts
-    }
-    
-    func amountSpendedByMonth(monthExpenses: [ExpenseItem]) -> Double {
-        monthExpenses.reduce(0) { partialResult, expense in
+    func monthTotalAmount(monthExpenses: [ExpenseItem]) -> Double {
+        return monthExpenses.reduce(0) { partialResult, expense in
             partialResult + expense.amount
         }
-    }
-    
-    func delete(_ offsets: IndexSet, from dayExpenses: [ExpenseItem], in context: ModelContext) {
-        for index in offsets {
-            context.delete(dayExpenses[index])
-        }
-        try? context.save()
     }
 }

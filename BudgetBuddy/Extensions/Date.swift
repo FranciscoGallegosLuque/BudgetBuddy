@@ -32,6 +32,10 @@ extension Date {
         return formatter.string(from: self)
     }
     
+    var monthNumber: String {
+        return self.formatted(Date.FormatStyle().month(.defaultDigits))
+    }
+    
     var year: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "YYYY"

@@ -9,15 +9,19 @@ import SwiftData
 import SwiftUI
 
 struct MonthData: Hashable {
-    let month: Date
+    var displayedMonth: String
     let totalAmount: Double
 }
 
 struct MonthlyExpensesListView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var viewModel: MonthlyExpensesListViewModel = MonthlyExpensesListViewModel()
+    private let viewModel: MonthlyExpensesListViewModel = MonthlyExpensesListViewModel()
     
     let yearExpenses: [ExpenseItem]
+    
+    private var displayedMonths: [MonthData] {
+        viewModel.displayedMonthData(from: yearExpenses)
+    }
     
     private var months: [String] {
         DateFormatter().monthSymbols
@@ -33,14 +37,14 @@ struct MonthlyExpensesListView: View {
 }
 
 extension MonthlyExpensesListView {
-    
-
     private var listView: some View {
         List {
-            ForEach(viewModel.monthData(yearExpenses: yearExpenses), id: \.self) { data in
+            ForEach(displayedMonths, id: \.self) { data in
                 HStack {
-                    Text(data.month.formatted())
-                    Text("\(data.totalAmount)")
+                    Text(data.displayedMonth)
+                        .font(.title3).fontWeight(.bold)
+                    Spacer()
+                    amountText(for: data.totalAmount)
                 }
                 
             }
@@ -48,13 +52,13 @@ extension MonthlyExpensesListView {
         .listStyle(.plain)
     }
 
-    private func rowContent(for expense: ExpenseItem) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            expenseDetailsText(for: expense)
-            Spacer()
-            amountText(for: expense)
-        }
-    }
+//    private func rowContent(for expense: ExpenseItem) -> some View {
+//        HStack(alignment: .firstTextBaseline) {
+//            expenseDetailsText(for: expense)
+//            Spacer()
+//            amountText(for: expense)
+//        }
+//    }
 
     private func dateText(for expense: ExpenseItem) -> some View {
         Text(expense.date.shortMonthDayTwoLines)
@@ -72,10 +76,10 @@ extension MonthlyExpensesListView {
         }
     }
 
-    private func amountText(for expense: ExpenseItem) -> some View {
+    private func amountText(for amount: Double) -> some View {
         HStack(alignment: .bottom) {
             Text(
-                expense.amount,
+                amount,
                 format: .currency(
                     code: Locale.current.currency?.identifier
                         ?? "USD"

@@ -25,6 +25,14 @@ final class HomeViewModel {
         }
     }
     
+    func expensesInMonth(for month: Date, in allExpenses: [ExpenseItem]) -> [ExpenseItem] {
+        filteredExpensesByMonth(allExpenses: allExpenses, date: month)[month] ?? []
+    }
+    
+    func expensesInYear(for year: Date, in allExpenses: [ExpenseItem]) -> [ExpenseItem] {
+        filteredExpensesByYear(allExpenses: allExpenses, date: year)[year] ?? []
+    }
+    
     func filteredExpensesByYear(allExpenses: [ExpenseItem], date: Date) -> [Date: [ExpenseItem]] {
         return Dictionary(grouping: allExpenses) { expense in
             let components = Calendar.current.dateComponents(
